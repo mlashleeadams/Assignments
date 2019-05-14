@@ -1,4 +1,4 @@
-# Assignments
+# HW1
 Hello, World
 sc%>%filter(adm_rate>.3)%>%summarize(mean_earnings=mean(md_earn_wne_p6,na.rm=TRUE))
 ## # A tibble: 1 x 1
