@@ -83,3 +83,11 @@ pd%>%group_by(homeown_rate_level)%>% ## Group by predictor
   ##Calculate mean at each level of predictor
   summarise(pred_income_homeown_rate=mean(median_hh_inc))
 ```
+
+
+# 6. Calculate a summary measure of the error in your predictions.
+
+```{r}
+rmse_cond_mean_two<-rmse(pd$median_hh_inc,pd$pred_income_household_and_homeown)
+rmse_cond_mean_two
+```
