@@ -1,1 +1,92 @@
+---
+title: "Homework 3"
+author: "Melanie Lashlee Adams"
+date: "05/29/2019"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
 
+```{r}
+library(tidyverse)
+```
+## Loading the dataset for the assignment questions
+```{r}
+load("attrition.Rdata")
+```
+
+## 1. Create a graphic that shows the distribution of Monthly income
+
+```{r}
+##The code below creates a Histogram showing the distribution of monthly income 
+gg<-ggplot(at,aes(x=MonthlyIncome))
+gg<-gg+geom_histogram(binwidth = 20,fill="lightblue")
+
+
+```
+
+```{r}
+gg<-gg+ylab("Count")+xlab("Monthly Income") ## x & y axis labels
+gg<-gg+theme(axis.text.x = element_text(angle = 50, hjust = 1))
+gg<-gg+ggtitle("Distribution of Monthly Income") ## Chart Title
+gg
+``` 
+## 2. Create a graph that shows the average level of monthly income by field of education
+
+```{r}
+
+at_sum<-at%>%group_by(MonthlyIncome, EducationField)%>%
+  summarize(mincome=mean(MonthlyIncome))%>%arrange(-mincome)
+at_sum
+```
+
+```{r}
+##Code to create a bar chart showing the average level of monthly income by field of education
+gg<-ggplot(at_sum,aes(x=EducationField,y=mincome,
+        fill=EducationField)) 
+ gg<-gg+geom_bar(stat="identity",position="dodge")
+gg<-gg+ylab("Mean of Monthly Income")+xlab("Education Field") ## x & y axis labels
+gg<-gg+theme(axis.text.x = element_text(angle = 50, hjust = 1))
+gg<-gg+ggtitle("Level of Monthly Income by Field of Education") 
+gg
+```
+
+## 3. Create another graph that shows the average level of monthly income by field of education and gender
+```{r}
+at_sum<-at%>%group_by(MonthlyIncome, EducationField, Gender)%>%
+  summarize(mincome=mean(MonthlyIncome))%>%arrange(-mincome)
+at_sum
+```
+
+```{r}
+gg<-ggplot(at_sum,aes(x=reorder(EducationField,mincome),
+                      y=mincome,
+                      fill=Gender))
+ gg<-gg+geom_bar(stat="identity",position="dodge")
+gg<-gg+facet_wrap(~Gender)
+gg<-gg+coord_flip()
+gg<-gg+ylab("Mean of Monthly Income")+xlab("Education Field")
+gg<-gg+theme(axis.text.x = element_text(angle = 60, hjust = 1))
+gg<-gg+ggtitle("Level of Monthly Income by Field of Education & Gender")
+gg
+```
+
+## 4. Create a graph that shows average levels of monthly income by field of education, gender and job level (scale of 1-5, highest ranked employees are 5)
+```{r}
+at_sum<-at%>%group_by(MonthlyIncome, EducationField, Gender, JobLevel)%>%
+  summarize(mincome=mean(MonthlyIncome))%>% 
+  ungroup()%>%
+  arrange(mincome)
+at_sum
+```
+
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+gg<-ggplot(at_sum,aes(x=fct_reorder(Gender,mincome),y=mincome))
+gg<-gg+geom_bar(stat="identity",aes(fill=EducationField),position="dodge")
+gg<-gg+facet_wrap(~Gender+JobLevel,ncol=4)
+gg<-gg+ylab("Mean of Monthly Income")+xlab("Gender")##labels the x & y axis
+gg<-gg+theme(axis.text.x = element_text(angle = 60, hjust = 1))
+gg<-gg+ggtitle("Level of Monthly Income by Field of Education, Gender & Job Level")
+gg
+```
