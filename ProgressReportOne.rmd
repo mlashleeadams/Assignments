@@ -1,0 +1,44 @@
+---
+title: "Progress Report One"
+author: "Melanie Lashlee Adams"
+output:
+  word_document: default
+  html_document: default
+---
+
+
+
+## Melanie Lashlee Adams- Week Three Progress Report
+
+## Problem Introduction
+Working in the field of leadership development with corporate organizations as clients, diversity and inclusion practices are frequently a topic of discussion and often of consternation.   Many organizations that I consult with are currently struggling to develop diversity and inclusion policies of hiring, engagement, and disclosure that would build more sustained diverse employee bases.  
+
+In an effort to bring relevant data points to my corporate clients when working in the space of diversity and inclusion topics, I will evaluate best practices as well as largest gaps of diversity employment among large, financially successful and stable organizations by using data collected by Fortune Magazine in during their 2017 Fortune 500 Diversity Project efforts.  Through this process I will compare the reporting organizations in various subsections of diversity factors and attempt to calculate realistic goals for organizations that I encounter in my own consulting work.
+
+
+## Motivating the Approach
+
+As organizations strive to become leaders in diversity and inclusion efforts, I believe it is important to set and work towards relevant and attainable goals, rather than merely stating broad, aspirational goals related to diversity and inclusion.  For this reason, I would like to provide meaningful benchmark data from top firms when my clients are working with me to develop their next stage diversity strategies.  
+
+This motivation is somewhat different than the original inspiration for this data collection, which was the following question, posed by Fortune, however I believe the dataset collected with this intended focus will allow for additional focus of analysis:
+
+Are the companies that release the most information more or less diverse than their peers? Are there any particular industries that stand out?
+
+Fortune’s efforts to collect and disseminate diversity statistics for the top organizations in the country will be helpful as I work to provides both appropriate benchmarks and potentially relevant aspirational model organizations.  
+
+
+## Data Details
+
+From Kaggle:
+This dataset contains the name of each firm, its rank in the 2017 Fortune 500, a link to its diversity and inclusion page or equal opportunity statement, and whether the company releases full, partial, or no data about the gender, race, and ethnicity of its employees. 
+There are over 200 fields in this dataset.
+
+## Dataset and additional details found at the following sites:
+
+https://www.kaggle.com/fortune-inc/f500-diversity#2017-F500-diversity-data.csv
+
+http://fortune.com/2017/06/16/why-we-logged-every-fortune-500-companys-diversity-data-or-lack-thereof/
+
+https://github.com/fortunedatateam/f500-diversity
+
+
