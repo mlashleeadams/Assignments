@@ -1,0 +1,123 @@
+---
+title: "Homework 4- Melanie Lashlee Adams"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Load libraries
+```{r} 
+library(tidyverse)
+library(haven)
+library(readxl)
+```
+
+# 1. Panel data for OECD countries. Save as file name oecd.RData http://www.wiley.com/legacy/wileychi/baltagi/supp/Gasoline.dat
+
+## Panel data for OECD countries. Save as file name oecd.RData 
+```{r}
+gas<-read_delim("http://www.wiley.com/legacy/wileychi/baltagi/supp/Gasoline.dat",
+                delim=" ",trim_ws = TRUE)
+save(gas,file="OECD.Rdata")
+```
+
+```{r}
+is.data.frame(gas)
+is.tibble(gas)
+is_tibble(gas)
+typeof(gas)
+```
+
+# 2. U.S. National Election Survey data from 2004. Save as file name nes.RData. http://www.uta.edu/faculty/story/DataSets.htm
+
+## U.S. National Election Survey data from 2004. Save as file name nes.RData. 
+```{r}
+nes<-read_spss("http://www.uta.edu/faculty/story/DataSets/NES2004.sav")
+# Now need to clean up 
+# Get rid of unwanted columns
+nes <-nes [ ,-(c(3))]
+# save file
+save(nes,file="nes.Rdata")
+```
+
+# 3. General social survey, student version. Save as file name gss.Rdata. http://www.uta.edu/faculty/story/DataSets.htm
+
+## General social survey, student version. Save as file name gss.Rdata. 
+```{r}
+if(file.exists("gss.xls")==FALSE)
+{download.file("http://www.uta.edu/faculty/story/DataSets/GeneralSocialSurvey1996ExcelDataStudentVersion.xls", destfile = "gss.xls")
+gss<-read_excel("gss.xls",skip=0,col_names=TRUE)
+}else{gss<-read_excel("gss.xls",skip=0,col_names=TRUE)}
+```
+
+## Check data
+```{r verify tibble}
+is.data.frame(gss)
+is.tibble(gss)
+is_tibble(gss)
+typeof(gss)
+```
+
+## Save file
+```{r save file}
+save(gss,file="gss.Rdata")
+```
+
+
+# 4. Replication file for “STATISTICAL DISCRIMINATION OR PREJUDICE? A LARGE SAMPLE FIELD EXPERIMENT”. Open up and save the mainData.csv file. Save it as maindata.RData. Available here, look under the “Data and Analysis” tab.
+## Web page: http://thedata.harvard.edu/dvn/dv/restat/faces/study/StudyPage.xhtml?globalId=doi:10.7910/DVN/26410&studyListingIndex=1_f1a615c2cbee97fb79c9d575ae73
+
+```{r}
+#Load in the mainData dataset
+library(readr)
+mainData<-read_csv(file="https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/26410/05NHUX")
+write_csv(mainData,path="mainData.csv")
+# Get rid of unwanted columns
+mainData <-mainData [ ,-(c(1))]
+#Check it out
+head(mainData)
+```
+
+```{r verify tibble}
+is.data.frame(mainData)
+is.tibble(mainData)
+is_tibble(mainData)
+typeof(mainData)
+```
+
+
+```{r}
+#Saving as an R file
+save(mainData,file="mainData.Rdata")
+```
+
+
+# 5. The Lalonde dataset, covering work experiences in the Panel Study of Income Dynamics (psid). Save as psid.RData http://users.nber.org/~rdehejia/data/psid_controls.txt
+
+## The variables from left to right are: treatment indicator (1 if treated, 0 if not treated), age, education, Black (1 if black, 0 otherwise), Hispanic (1 if Hispanic, 0 otherwise), married (1 if married, 0 otherwise), nodegree (1 if no degree, 0 otherwise), RE74 (earnings in 1974), RE75 (earnings in 1975), and RE78 (earnings in 1978). 
+```{r}
+psid_controls <- read.table("http://www.nber.org/~rdehejia/data/psid_controls.txt", quote="\"", comment.char="")
+```
+
+## Label Data
+```{r PSID labels}
+names(psid_controls)<-c("treatment",
+                "age",
+                "education",
+                "black",
+                "hispanic",
+                "married",
+                "nodegree",
+                "earnings1974",
+                "earnings1975",
+                "earnings1978")
+head(psid_controls)
+```
+
+
+```{r Save dataset as Rdata file}
+save(psid_controls,file="psid.Rdata")
+```
