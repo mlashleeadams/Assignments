@@ -1,0 +1,72 @@
+---
+title: "Hw5MelanieLashleeAdams"
+output:
+  word_document: default
+  html_document: default
+---
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load libraries
+```{r,echo=FALSE}
+rm(list=ls())
+library(tidyverse)
+library(forcats)
+library(ModelMetrics)
+library(modelr)
+```
+
+
+## 1. Create a regression that predicts reading scores as a function of SES, using the training data.
+
+## Load the ELS training data
+
+```{r}
+load("els_train.RData")
+```
+
+## Predicting reading scores as a function of SES
+```{r}
+mod1<-lm(bynels2r~byses1,data=els_train) #outcome on left, predictor on right 
+summary(mod1)
+confint(mod1)
+# Plot
+rg<-ggplot(els_train, aes(x=byses1,y=bynels2r))+ #specify data and x and y
+           geom_point(shape=1)+ #specify points
+           geom_smooth(method=lm) #ask for lm line
+rg
+els_train<-els_train%>%add_predictions(mod1)%>%rename(pred1=pred) #predict using data in memory
+ 
+## RMSE
+rmse_1<-modelr::rmse(mod1,els_train);rmse_1
+```
+
+## 2. Report the RMSE from a validation of your model using the testing data.
+## Run model against training dataset
+
+```{r}
+load("els_test.Rdata")
+mod1<-lm(bynels2r~byses1,data=els_train)
+summary(mod1)
+rmse_2<-modelr::rmse(mod1,els_test);rmse_2
+```
+## 3. Add another covariate to your model from 1.
+## Multiple Regression predicting reading scores by SES and race
+```{r}
+mod2<-lm(bynels2r~as.factor(byrace)+
+           byses1,
+          data=els_train)
+summary(mod2) 
+els_train<-els_train%>%add_predictions(mod2)%>%rename(pred2=pred)
+rmse_3<-modelr::rmse(mod2,els_train); rmse_3
+```
+
+## 4. Again report the RMSE from a validation of your model using the testing data. Did you model improve? By how much?
+```{r}
+rmse_test_1<-modelr::rmse(mod1,els_test);rmse_test_1
+rmse_test_2<-modelr::rmse(mod2,els_test);rmse_test_2
+```
