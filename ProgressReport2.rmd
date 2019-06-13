@@ -1,0 +1,70 @@
+---
+title: "Progress Report 2"
+author: "Melanie Lashlee Adams"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+## Melanie Lashlee Adams - Week Six Progress Report
+
+## Exploratory Data Analysis
+The data collection among the Fortune500 Diversity Data Project indicate that the vast majority of Fortune’s top companies do not publicly report their diversity employment statistics.  This is somewhat in contrast to the broad-reaching statements of values, goals, and strategies aimed at developing or maintaining a more diverse and inclusive culture within these same companies.  These diversity statements were also studied as a part of the original project, but for the purpose of this project, but will not be the focus of this project.  
+
+The focus will be on evaluating and ideally predicting the baseline benchmarks for diversity employment at the highest levels of leadership in top-grossing companies.  In order to create these foundational parameters for organizations that are interested in setting attainable and realistic goals for adding more diverse leaders at the middle and senior levels of their ranks, this dataset will be used to first establish the current values, both minimum and maximum, of diverse employees who are in these types of positions.  Secondly, these findings will be compared with Fortune’s ranking in order to predict whether those with higher or lower diversity in senior and middle manager positions are more successful according to the Fortune500 established criteria.
+
+Separately from the Fortune rankings, this dataset will also be investigated to determine if associations can be made about total percentage of diverse employees in all indicated positions and an increase in those who are diverse in the senior and middle manager roles within the same company.  The research question for this predictive analysis is: “does a higher percentage of diverse employees in total employee count predict a higher percentage of diversity in the senior and middle manager roles?”  This will be a key discovery question to investigate, as it will potentially create motivation for organizations to hire and retain more diverse employees across the organization, rather than just focusing on adding one more diverse senior executive.
+
+The following preliminary steps were taken to first narrow down the dataset to only include those companies who fully reported the data in question.  And after this inital step, I have illustrated some basic information about the companies that will be studied in the next phase of my data analysis.
+
+
+## Load libraries
+```{r,echo=FALSE}
+rm(list=ls())
+library(tidyverse)
+library(forcats)
+library(ModelMetrics)
+library(modelr)
+library(ggplot2)
+library(knitr)
+library(readxl)
+```
+
+## Load original Fortune500 Diversity Data Set
+```{r}
+div<-read_excel("/Users/mlashleeadams/Desktop/div.xlsx",skip=0,col_names = TRUE)
+
+save(div,file="div.Rdata")
+
+```
+
+## Load revised dataset that includes only those companies that reported either full or partial diversity data
+```{r}
+divrevised<-read_excel("/Users/mlashleeadams/Desktop/divrevised.xlsx",skip=0,col_names = TRUE)
+
+save(divrevised,file="div.Rdata")
+
+```
+
+## Load revised dataset that includes only companies that reported full diversity data
+```{r}
+divfulldatavail<-read_excel("/Users/mlashleeadams/Desktop/divfulldataavail.xlsx",skip=0,col_names = TRUE)
+
+save(divfulldatavail,file="div.Rdata")
+
+```
+
+## Load filtered dataset that includes only companies that reported full diversity data and filtered to include only diversity statistics for leadership positions
+```{r}
+divleadstats<-read_excel("/Users/mlashleeadams/Desktop/divleadstats.xlsx",skip=0,col_names = TRUE)
+
+save(divleadstats,file="div.Rdata")
+
+```
+
+## Graphic to illustrate how many Fortnue500 companies reported diversity data 
+```{r}
+gg<-ggplot(div,aes(x=`data-avail`,fill=`data-avail`))
+gg<-gg+geom_bar()
+gg
+``` 
