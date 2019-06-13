@@ -68,3 +68,82 @@ gg<-ggplot(div,aes(x=`data-avail`,fill=`data-avail`))
 gg<-gg+geom_bar()
 gg
 ``` 
+
+## Graph to illustrate what year the diversity data was reported in for each company
+```{r}
+gg<-ggplot(div,aes(x=`data-year`,fill=`data-year`))
+gg<-gg+geom_bar()
+gg
+``` 
+
+## Graph t illustrate how many companies provided either partial or full data
+```{r}
+gg<-ggplot(divrevised,aes(x=`data-avail`,fill=`data-avail`))
+gg<-gg+geom_bar()
+gg
+``` 
+
+## Graph to illustrate what year the partial or full data represented for reporting companies
+```{r}
+gg<-ggplot(divrevised,aes(x=`data-year`,fill=`data-year`))
+gg<-gg+geom_bar()
+``` 
+
+## Graph to illustrate what year data was reported in for only those companies who provided full diversity data
+```{r}
+gg<-ggplot(divfulldatavail,aes(x=`data-year`,fill=`data-year`))
+gg<-gg+geom_bar()
+gg
+``` 
+
+## Histogram to illustrate where the fully reporting companies fall within the Fortune500 ranking list
+```{r}
+gg<-ggplot(divfulldatavail,aes(x=`f500-2017-rank`))
+gg<-gg+geom_histogram(binwidth = 10,fill="lightblue")
+gg
+``` 
+
+## Histogram using the narrowed down data set that shows only full reporting companies and only the leadership diversity statistics
+## Histogram indicates total number of employees in these 16 companies
+```{r}
+gg<-ggplot(divleadstats,aes(x=`TOTAL10`))
+gg<-gg+geom_histogram(binwidth = 1000,fill="darkblue")
+gg
+``` 
+
+
+## Revised histogram illustrating total number of employees with company names included
+## Companies listed in Fortune500 ranking order
+```{r}
+
+gg<-ggplot(divleadstats,aes(y=TOTAL10, x=name))
+
+gg<-gg+geom_bar(stat="identity")
+
+## Labeling
+gg<-gg+xlab("Company Name")+ylab("Total Employees")
+##Print
+gg
+```
+
+## Filtered data of largest company in dataset- Amazon- and smallest company- eBay- listing the total employee count, total senior manager/leader, total middle manager/leder
+## Filtered data of same two companies and the total number of employees, total males in senior roles, total males in middle mgr role
+## Filtered data of same two companies and the total number of employees, total females in senior roles, total females in middle mgr role
+```{r filter_select_arrange}
+divleadstats%>%filter(name=="Amazon.com")
+
+divleadstats%>%filter(name=="Amazon.com")%>%select(name,TOTAL10,TOTAL1, TOTAL1_2 )
+
+divleadstats%>%filter(name=="eBay")
+
+divleadstats%>%filter(name=="eBay")%>%select(name,TOTAL10,TOTAL1, TOTAL1_2 )
+
+divleadstats%>%filter(name=="Amazon.com")%>%select(name,TOTAL10,MT1, MT1_2 )
+
+divleadstats%>%filter(name=="eBay")%>%select(name,TOTAL10, MT1, MT1_2 )
+
+divleadstats%>%filter(name=="Amazon.com")%>%select(name,TOTAL10,FT1, FT1_2 )
+
+divleadstats%>%filter(name=="eBay")%>%select(name,TOTAL10, FT1, FT1_2 )
+
+```
