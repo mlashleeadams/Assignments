@@ -1,0 +1,117 @@
+---
+title: "Assignment6"
+output:
+  word_document: default
+  html_document: default
+---
+
+## Setup
+Open `els.RData` dataset and creating a codebook. 
+
+```{r,echo=FALSE}
+library(tidyverse)
+library(forcats)
+library(modelr)
+#Load data
+load("/Users/mlashleeadams/Downloads/week6_resources_2_2_2/els.Rdata")
+```
+## Data Categories
+# |Name | Descripton
+#---   |    ---
+#|stu_id | Student Id
+#|bynels2m | Math Score
+#|bynels2r | Reading Score
+#|amind| American Indian/Native American
+#|asian| Asian
+#|black| Black/African American
+#|white| White
+#|hispanic | Hispanic
+#|urm | Underrepresented Minority
+#|byses1| Socio-Economic Status
+#|byincome | Income (1-13, in $10,000)
+#|bypared| Parental Education
+#|byrace | Race
+
+## 1. Choose a dependent variable and plot that dependent (Reading Scores) variable as a function of a continuous independent variable (SES).
+
+```{r}
+#Plot Reading Scores vs. SES
+g1<-ggplot(data=els,
+           aes(x=byses1,y=bynels2r)
+           )
+g1<-g1+geom_point(alpha=.5,size=.25) # Add points at x and y
+g1
+```
+
+## 2. If you need to, adjust the scale of either the dependent variable or independent variable to make more sense.
+
+```{r}
+#Plot Reading Scores vs. SES
+g1<-ggplot(data=els,
+           aes(x=byses1,y=bynels2r)
+           )
+# scatter plots : change x and y limits
+g1 + xlim(-2, 2)+ylim(0, 51)
+# Change in size and intensity of points
+g1<-g1+geom_point(alpha=.5,size=.2) # Add points at x and y
+g1
+```
+
+## Using conditional means and percentile rank to adjust scale
+
+```{r}
+els_sum<-els%>%
+  mutate(ses_rank=percent_rank(byses1)*100)%>%
+  mutate(ses_rank_r=round(ses_rank))%>%
+  group_by(ses_rank_r)%>%
+  summarize(test_mean=mean(bynels2r,na.omit=TRUE))
+g1a<-ggplot(els_sum,aes(x=ses_rank_r,y=test_mean))
+g1a<-g1a+geom_point()
+g1a<-g1a+ylab("Test Scores")+xlab("SES Rank")
+g1a
+```
+## 3. Add a line of best fit to your graphic. Show both the loess and lm lines. Hint: Use geom smooth.
+
+```{r}
+g1<-g1+geom_smooth(method="lm")
+g1<-g1+geom_smooth(method = "loess")
+g1
+```
+
+## 4. Clean up the labeling and description of the graphic so that it could be presented to a broader audience.
+
+```{r}
+g1<-g1+geom_smooth(method="lm")
+g1<-g1+geom_smooth(method = "loess",color="blue")
+g1<-g1+geom_smooth(color="red")
+# Labels
+g1<-g1+ylab("Reading Test Scores")+xlab("Socio Economic Status")
+g1
+```
+## Or we can use Conditional Means
+# Average amount of reading test scores at every percentile level of `byses1`.   
+
+```{r}
+els_sum<-els%>%
+  mutate(ses_rank=percent_rank(byses1)*100)%>%
+  mutate(ses_rank_r=round(ses_rank))%>%
+  group_by(ses_rank_r)%>%
+  summarize(test_mean=mean(bynels2r,na.omit=TRUE))
+g1a<-ggplot(els_sum,aes(x=ses_rank_r,y=test_mean))
+g1a<-g1a+geom_point()
+g1a<-g1a+ylab("Reading Test Scores")+xlab("SES Rank")
+g1a
+```
+## Add regresion lines to simplified data
+```{r}
+g1b<-g1a+geom_smooth(method="lm") # Add a line
+g1b<-g1b+geom_smooth(method = "loess",color="blue")
+g1b<-g1b+geom_smooth(color="red")
+g1b
+```
+
+## 5. In your .Rmd file, include a few sentences describing what the graphic above shows.
+# The above graph is a simplified version of the data Reading Test Scores vs. SES with two regression lines- an lm and a loess. 
+# lm fits a straight line through a set of points and is similar to a best line fit.
+# loess fits a curve through a set of points and is similar to modeling with calculus. It is the weighted sum of squared errors and more accurately account for the range in the data set. 
+
