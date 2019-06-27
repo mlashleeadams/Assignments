@@ -1,0 +1,166 @@
+---
+title: "Homework7"
+author: "Melanie Lashlee Adams"
+date: "6/27/2019"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+## Ways of getting data from the web
+
+1. Directly downloading web pages via the `url()` command. 
+2. Scraping simple web tables via `read_html()` and `html_table()` command
+3. Interacting with Application Programming Interfaces (APIs) via R libraries that have been designed as "wrappers" for these interfaces, like the awesome `acs` library and the `tigris` library for geographic shapes. 
+4. Interacting with APIs directly, 
+
+
+## Libraries
+
+We will use multiple new libraries today. Among the ones you'll need: 
+
+* `rvest` for scraping websites
+
+* `acs` for accessing American Community Survey data via the census API
+
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(acs)
+library(lubridate)
+library(noncensus)
+library(tigris)
+```
+
+## 1. Download data for all of the zip codes in Los Angeles county on education levels.
+## Zip Code Level Data from the American Community Survey
+
+The first step is to create a list of all zip codes in Los Angeles County. We can do this by using another dataset that includes a comprehensive listing of zip codes by county and city. 
+
+We start by using the lookup_code from the `tigris` package to get the fips codes for Los Angeles County in CA.
+
+```{r}
+## Look up fips code for county
+lookup_code("CA","Los Angeles") 
+lastate_fips<-"06"
+lacounty_stub<-"037"
+```
+
+Next, we'll combine the state and county fips into a single object
+
+```{r}
+lacounty_fips<-paste0(lastate_fips,lacounty_stub)
+```
+
+```{r}
+# Get dataset that matches all zip codes to cities, counties and states. 
+lacounty_to_zip<-read_csv("http://www2.census.gov/geo/docs/maps-data/data/rel/zcta_county_rel_10.txt")
+save(lacounty_to_zip,file="lacounty_to_zip.Rdata")
+#easier names to work with
+names(lacounty_to_zip)<-tolower(names(lacounty_to_zip))
+#Just zip codes in selected county
+lacounty_to_zip<-lacounty_to_zip%>%
+  filter(state==as.numeric(lastate_fips),county==lacounty_stub)%>%
+  select(zcta5,state,county)
+#list of zip codes
+laziplist<-lacounty_to_zip$zcta5
+#City names
+data(zip_codes)
+lacity_zip<-zip_codes%>%filter(zip%in%laziplist)%>%select(zip,city)
+#Arrange in order
+lacity_zip<-lacity_zip%>%arrange(as.numeric(zip))
+```
+
+# Use key to access data
+
+```{r}
+# load in ACS Key
+#my_acs_key<-readLines("/home/CensusAPI.txt",warn = FALSE)
+acs_key<-"a5d0a1ba56e3eb7ce7051b45c496929a3e9110c0"
+# Or just paste it here.
+#List of tables: https://www.census.gov/programs-surveys/acs/technical-documentation/summary-file-documentation.html under, 1-year appendices
+# We will use this one- b15002: education of pop over 25, by sex 
+# Another is b19001: household income over last 12 months
+api.key.install(acs_key, file = "key.rda")
+laselect_zip<-geo.make(zip.code=laziplist)
+lacounty_educ=acs.fetch(geography=laselect_zip,
+                      endyear=2016,
+                      table.number="B15002",
+                      col.names="pretty",verbose=T)
+#save(lacounty_educ,file="lacounty_educ_la.Rdata")  # <---- this may take a long time :(
+acs.colnames(lacounty_educ)
+```
+## 2. Compute the proportion of the population that has a bachelor’s degree or above by census tract.
+
+```{r}
+## Proportion of individuals at college or above=
+## number with college degree/
+## total number
+laprop_coll_above<-divide.acs(numerator=(lacounty_educ[,15]+
+                                      lacounty_educ[,16]+
+                                      lacounty_educ[,17]+
+                                      lacounty_educ[,18]+
+                                      lacounty_educ[,32]+
+                                      lacounty_educ[,33]+
+                                      lacounty_educ[,34]+
+                                      lacounty_educ[,35]),
+                            denominator=lacounty_educ[,1])
+### Double check -- 1 is total population and others are groups with Bachelor's or above. check with acs.colnames(lacounty_educ)
+head(laprop_coll_above)
+```
+
+## 3. Download data for all of the zip codes in LA county on family income by census tract.
+#List of tables: https://www.census.gov/programs-surveys/acs/technical-documentation/summary-file-documentation.html under, 1-year appendices
+# Now we will use this one- b19001: household income over last 12 months
+## Family Income Data
+```{r}
+# 19001-- family income     
+laselect_zip<-geo.make(zip.code=laziplist)
+lacounty_income<-acs.fetch(geography=laselect_zip, 
+                        endyear = 2016,
+                        table.number="B19001", 
+                        col.names="pretty")
+acs.colnames(lacounty_income)
+head(lacounty_income)
+```
+
+## 4. Compute the proportion of the population that has family income above 75,000 in each census tract.
+
+```{r}
+#Proportion above 75k-- 
+prop_above_75<-divide.acs(numerator=(lacounty_income[,13]+
+                            lacounty_income[,14]+
+                            lacounty_income[,15]+
+                            lacounty_income[,16]+
+                            lacounty_income[,17]),
+                          denominator=lacounty_income[,1]
+                          )
+head(prop_above_75)
+```
+
+
+## 5. Plot the proportion of residents with incomes above 75,000 as a function of income.
+```{r}
+# Convert to tibble
+lacounty_df<-tibble(substr(geography(lacounty_educ)[[1]],7,11),
+                       as.numeric(estimate(laprop_coll_above)),
+                       as.numeric(estimate(prop_above_75))
+)
+# Give it easy to use names
+names(lacounty_df)<-c("zip","college_educ","income_75")
+save(lacounty_df,file="dav.RData")
+head(lacounty_df)
+```
+
+```{r Plot Proportion, echo=T, warning=F, message=F, fig.show='asis'}
+gg<-ggplot(lacounty_df,aes(x=college_educ,y=income_75))+
+  geom_point(alpha=.5,size=.25)+
+  scale_y_continuous(breaks = seq(10,50, by=5))+
+  scale_color_discrete()+
+  geom_smooth(method = "lm")+ # will default to the LOESS method
+  geom_smooth(method = "loess",color="red")+
+  geom_smooth(color="orange")+labs(title = "Proportion of LA County Residents with Incomes Above $75K", x="College Education",y="Income")
+print(gg)
+```
