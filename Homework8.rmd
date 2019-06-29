@@ -1,0 +1,134 @@
+---
+title: "Homework8"
+author: "Melanie Lashlee Adams"
+date: "6/27/2019"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r libraries}
+library(tidyverse)
+library(knitr)
+library(modelr)
+library(caret)
+library(forcats)
+```
+
+## 1. Calculate the proportion of lemons in the training dataset using the IsBadBuy variable.
+training<-read_csv("/Users/mlashleeadams/Documents/Data Science /training.csv",skip=0,col_names = TRUE) 
+save(training,file="training.Rdata")
+load("training.Rdata")
+
+## Dependent Variable
+
+```{r}
+table(training$IsBadBuy)
+```
+
+## Proportion Calculation
+```{r}
+prop.table(table(training$IsBadBuy))
+```
+
+## 2. Calculate the proportion of lemons by Make
+
+```{r condtional_means}
+training%>%group_by(Make)%>%summarize(mean(IsBadBuy))
+```
+
+```{r}
+prop.table(table(training$Make,training$IsBadBuy),margin=1)
+```
+
+```{r}
+g_table<-table(training$Make,training$IsBadBuy);g_table
+prop.table(g_table,margin=1)
+```
+
+## 3. Now, predict the probability of being a lemon using a linear model (lm(y~x), with covariates of your choosing from the training dataset.
+
+## Classification Using Linear Probability Model
+
+```{r linear_model}
+# Linear model
+lem_mod<-lm(IsBadBuy~
+             Nationality+
+             VehOdo+
+             PurchDate+
+             Make,
+           data=training,y=TRUE,na.exclude=TRUE);summary(lem_mod)
+```
+
+## 4. Make predictions from the linear model.
+
+```{r}
+#Predictions
+training<-training%>%
+  add_predictions(lem_mod)%>% ## Add in predictions from the model
+  rename(pred_lemX=pred)%>% ## rename to be predictions from ols (lm)
+  mutate(pred_lem_out=ifelse(pred_lem>=.5,1,0))
+```
+
+```{r}
+#Predictions
+training<-training%>%
+  add_predictions(lem_mod)%>% ## Add in predictions from the model
+  rename(pred_lemZ=pred)%>% ## rename to be predictions from ols (lm)
+  mutate(pred_lem_out=ifelse(pred_lem>=.5,1,0))
+```
+
+```{r LM Prediction Table}
+predlm_table2 <- table(training$IsBadBuy,training$pred_lm_out)
+predlm2_table
+```
+
+```{r Probability Table Clean-up, echo=TRUE}
+prop.table(predlm2_table)
+rownames(predlm2_table) <- c("Predicted 0","Predicted 1")
+colnames(predlm2_table) <- c("Actually 0", "Actually1")
+```
+
+
+## 5. Now, predict the probability of being a lemon using a logistic regression (glm(y~x,family=binomial(link="logit"))), again using covariates of your choosing.
+
+```{r}
+#Logisitic model
+logitlem_mod<-glm(IsBadBuy~
+             VehicleAge+
+             VehOdo+
+             WarrantyCost+
+             Make,,
+             data=training,
+            na.action=na.exclude,
+            family=binomial(link="logit"),
+               y=TRUE)
+summary(logitlem_mod)
+```
+
+
+## 6. Make predictions from the logit model. Make sure these are probabilities. 
+```{r}
+training<-training%>%
+  mutate(pred_logitlem=predict(logitlem_mod,type="response"))
+```
+
+```{r}
+training<-training%>%
+    mutate(pred_logitlem_out=ifelse(pred_logitlem>=.3,1,0))
+training<-training%>%
+    mutate(pred_logitlem_out=as.factor(pred_logitlem_out))
+training<-training%>%
+    mutate(IsBadBuy=as.factor(IsBadBuy))
+```
+
+
+# 7. Create a confusion matrix from your linear model and your logit model.
+```{r}
+confusionMatrix(data=as.factor(training$pred_logitlem_out),reference=as.factor(training$IsBadBuy))
+```
