@@ -1,0 +1,147 @@
+---
+title: "Homework9"
+author: "Melanie Lashlee Adams"
+date: "7/10/2019"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(modelr)
+library(knitr)
+load("training.RData")
+# For this assignment, use the lemons dataset, which is a subset of the dataset used for a Kaggle competition described here: https://www.kaggle.com/c/DontGetKicked/data.
+```
+
+## 1. Using the lemons dataset, plot the probability of a car being a bad buy by make.
+
+Crosstab of `IsBadBuy` with the independent variable of `Make`
+
+```{r}
+tab_make<-with(training,table(Make,IsBadBuy))
+```
+
+Change the row and column titles
+
+```{r}
+colnames(tab_make)<-c("Not a Lemon","Lemon")
+kable(tab_make)
+```
+Add proportions to this table.
+```{r}
+tab_make_prop<-prop.table(tab_make,margin=1)
+kable(tab_make_prop)
+```
+
+Percentages
+```{r}
+kable(round(tab_make_prop*100,1))
+```
+
+Format data for barcharts.  Use the variable "Make" to calculate the probability of the car being a lemon. 
+
+```{r}
+training_sum <- training%>%
+  group_by(Make)%>%
+  summarise(prob_bb=mean(IsBadBuy,na.rm=T))
+```
+
+Plot with ggplot 
+
+```{r}
+gg1 <- ggplot(training_sum, aes(y=prob_bb, x=Make))+
+  geom_bar(stat = "identity", position = "dodge")+
+  labs(title = "Probability of Lemons", x="Make of Vehicle", y="Lemon")+
+  theme(legend.title = element_blank())
+gg1 <- gg1+geom_text(aes(label=round(prob_bb,2)),
+                     position = position_dodge(width = .9),
+                     vjust=.25)
+gg1
+```
+
+## 2. Create a table that shows the probability of a car being a bad buy by make.
+
+```{r}
+prop.table(tab_make,margin=1)%>%kable()
+```
+
+## 3. Create a heatmap of the probability of a car being a bad buy by make and acquisition type.
+## Note AcquisitionType is a category listed in the Carvana_Data_Dictionary.txt but doesn't exist in the data (training or test). I will use Color instead.
+
+Quartiles
+```{r}
+training <- training%>%
+  mutate(Make_quintile=ntile(Make,5),
+         Color_quintile=ntile(Color,5))
+```
+
+Summary dataset showing probabilities of the outcome across all of the combined categories of the two independent variables. 
+
+```{R}
+training_sum<-training%>%
+  group_by(Make_quintile,Color_quintile)%>%
+  summarize(prob_make=mean(IsBadBuy,na.rm=TRUE))%>%
+  arrange(-prob_make)
+```
+
+Remove missing data.
+
+```{r}
+trainin_sum<-training_sum%>%filter(!(is.na(Make_quintile)),!(is.na(Color_quintile)))
+```
+
+Plot it.
+
+```{r}
+gg<-ggplot(training_sum,
+           aes(x=as.factor(Make_quintile),
+               y=as.factor(Color_quintile),fill=prob_make))
+gg<-gg+geom_tile()
+gg<-gg+scale_fill_gradient(low="white",high="red")
+gg<-gg+xlab("Make")+ylab("Color")
+gg<-gg+theme(legend.title=element_blank())
+gg
+```
+
+
+## 4. Create a plot of your choosing that shows the probability of a car being a bad buy by year and make.
+
+```{r}
+tab_make_year<-with(filter(training,
+                           as.character(VehYear)!="Year of Car"),
+                           table(Make,IsBadBuy))
+```
+
+*Outcome by "Make" AND "Year"*
+```{r}
+prop.table(tab_make_year,margin=1)%>%kable()
+```
+
+## Bar Graphs from Cross Tabs
+
+Format data for barcharts, use of the concept of conditional means. 
+
+```{r}
+training2_sum<-training%>%
+  group_by(VehYear,Make)%>%
+  summarize(prob_lemon=mean(IsBadBuy,na.rm=TRUE))
+```
+
+Plot using ggplot commands:
+
+```{r}
+gg2<-ggplot(training2_sum,aes(y=prob_lemon,x=Make,fill=VehYear))
+gg2<-gg2+geom_bar(stat="identity",position="dodge")
+gg2<-gg2+xlab("Make")+ylab("Pr(Lemon)")
+gg2<-gg2+theme(legend.title=element_blank())
+gg2<-gg2+geom_text(aes(label=round(prob_lemon,2)),
+                   position=position_dodge(width=.9),
+                   vjust=-.25)
+gg2
+```
